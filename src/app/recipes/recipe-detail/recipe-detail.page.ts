@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { RecipesService } from '../recipes.service';
 import { Recipe } from '../recipe.model';
+import { AlertController } from '@ionic/angular';
 
 @Component({
   selector: 'app-recipe-detail',
@@ -10,7 +11,8 @@ import { Recipe } from '../recipe.model';
 })
 export class RecipeDetailPage implements OnInit {
   loadedRecipe: Recipe;
-  constructor(private activatedRoute: ActivatedRoute, private recipeServices: RecipesService, private route: Router) { }
+  constructor(private activatedRoute: ActivatedRoute, private recipeServices: RecipesService, private route: Router,
+    private alertCtrl: AlertController) { }
 
   ngOnInit() {
     this.activatedRoute.paramMap.subscribe(paramMap => {
@@ -24,8 +26,22 @@ export class RecipeDetailPage implements OnInit {
   }
 
   onDeleteRecipe() {
-    this.recipeServices.deleteRecipe(this.loadedRecipe.id);
-    this.route.navigate(['/recipes']);
+    this.alertCtrl.create({
+      header: "Certeza que deseja excluir?",
+      message: `Se você clicar em <strong>excluir</strong> você irá apagar ${this.loadedRecipe.title}`,
+      buttons: [{
+        text: 'Cancelar',
+        role: 'cancel'
+      }, {
+        text: "Excluir",
+        handler: () => {
+          this.recipeServices.deleteRecipe(this.loadedRecipe.id);
+          this.route.navigate(['/recipes']);
+        }
+      }
+      ]
+    }).then(alertEl => {
+      alertEl.present();
+    });
   }
-
 }
